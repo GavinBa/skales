@@ -47,6 +47,7 @@ if __name__ == "__main__":
 	parser.add_option("--kernel", dest="kernel", metavar="FILE",
 			  help="Input kernel image")
 	parser.add_option("--ramdisk", dest="ramdisk", metavar="FILE",
+			  default=None,
 			  help="Input ramdisk image")
 	parser.add_option("--base", type="int", dest="base",
 			  help="Start address of kernel image")
@@ -67,8 +68,6 @@ if __name__ == "__main__":
 
 	if options.kernel is None:
 		parser.error("Must specify --kernel")
-	if options.ramdisk is None:
-		parser.error("Must specify --ramdisk")
 	if options.output is None:
 		parser.error("Must specify --output")
 	if options.base is None:
@@ -80,10 +79,15 @@ if __name__ == "__main__":
 		kernel = open(options.kernel, 'rb')
 	except IOError:
 		exit("Can't open %s" % options.kernel)
-	try:
-		ramdisk = open(options.ramdisk, 'rb')
-	except IOError:
-		exit("Can't open %s" % options.ramdisk)
+
+	if options.ramdisk is None:
+		ramdisk = None
+	else:
+		try:
+			ramdisk = open(options.ramdisk, 'rb')
+		except IOError:
+			exit("Can't open %s" % options.ramdisk)
+
 	try:
 		output = open(options.output, 'wb')
 	except IOError:
@@ -113,12 +117,17 @@ if __name__ == "__main__":
 		else:
 			exit("dtb: %s is of unknown format" % options.devicetree)
 
+	if ramdisk is None:
+		ramdisk_sz = 0
+	else:
+		ramdisk_sz = os.fstat(ramdisk.fileno()).st_size
+
 	hdr_format = "<8sIIIIIIII2I16s512s8I"
 	output.write(pack(hdr_format,
 			  "ANDROID!",
 			  kernel_size,
 			  options.base + 0x8000,
-			  os.fstat(ramdisk.fileno()).st_size,
+			  ramdisk_sz,
 			  ramdisk_base,
 			  0, 0,
 			  tags,
@@ -133,7 +142,10 @@ if __name__ == "__main__":
 	if options.devicetree and append_dtb:
 		output.write(devicetree.read())
 	write_padding(output, pagesize)
-	output.write(ramdisk.read())
-	write_padding(output, pagesize)
+
+	if not ramdisk is None:
+		output.write(ramdisk.read())
+		write_padding(output, pagesize)
+
 	if options.devicetree and not append_dtb:
 		output.write(devicetree.read())
