@@ -102,6 +102,7 @@ platform_type = {
 		'stp'         : 23,
 		'sbc'         : 24,
 		'cls'         : 29,
+		'ap145'       : 0,
 		}
 
 pmic_ids = {
