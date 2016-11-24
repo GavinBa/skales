@@ -76,7 +76,7 @@ soc_ids = {
 		'msm8996'        : 246,
 		'apq8016'        : 247,
 		'msm8216'        : 248,
-		'ipq4019'        : 273,
+		'ipq40xx'        : 273,
 		'apq8096'        : 291,
 	}
 
@@ -103,6 +103,7 @@ platform_type = {
 		'sbc'         : 24,
 		'cls'         : 29,
 		'ap145'       : 0,
+		'apdk04'      : 0,
 		}
 
 pmic_ids = {
@@ -217,6 +218,7 @@ class QcomIds(object):
 	(-(?P<foundry>\d+))? # foundry (opt)
 	-(?P<platform>\w+) # Platform (req)
 	(/(?P<platform_sub>\d+))? # Number for platform sub (opt)
+	(.(?P<hw_major>\d+))? # Number for hw_major (opt)
 	(-v(?P<plat_major>\d+)(.(?P<plat_minor>\d+))?)? # Plat version (opt)
 	''', re.VERBOSE)
 
